@@ -13,6 +13,12 @@
 
 using namespace std;
 
+enum
+{
+    kSuccess,
+    kFailure,
+};
+
 struct terminal
 {
 	int id;
@@ -32,6 +38,9 @@ void set_name(int id, char name[]);
 void shared_print(string str, bool endLine);
 int broadcast_message(string message, int sender_id);
 int broadcast_message(int num, int sender_id);
+int get_reciver_id(const string &message);
+int private_message(string message, int sender_id, int reciver_id);
+int private_message(int num, int sender_id, int reciver_id);
 void end_connection(int id);
 void handle_client(int client_socket, int id);
 
@@ -143,6 +152,50 @@ int broadcast_message(int num, int sender_id)
 	}		
 }
 
+int get_reciver_id(const string &message)
+{
+    auto left_bracket = message.find_last_of('[');
+    auto right_bracket = message.find_last_of(']');
+    if (left_bracket < right_bracket)
+    {
+        auto reciver_name = message.substr(left_bracket + 1, right_bracket - left_bracket - 1);
+        for (auto client : clients)
+            if (client.name == reciver_name)
+                return client.id
+    }
+    return -1;
+}
+
+// Private message
+int private_message(string message, int sender_id, int reciver_id)
+{
+	char temp[MAX_LEN];
+	strcpy(temp,message.c_str());
+	for(int i=0; i<clients.size(); i++)
+	{
+		if(clients[i].id==reciver_id)
+		{
+			send(clients[i].socket,temp,sizeof(temp),0);
+            return kSuccesss;
+		}
+	}
+    return kFailure;
+}
+
+// Private message a number 
+int private_message(int num, int sender_id, int reciver_id)
+{
+	for(int i=0; i<clients.size(); i++)
+	{
+		if(clients[i].id==reciver_id)
+		{
+			send(clients[i].socket,&num,sizeof(num),0);
+            return kSuccess;
+		}
+	}
+    return kFailure;
+}
+
 void end_connection(int id)
 {
 	for(int i=0; i<clients.size(); i++)
@@ -187,9 +240,18 @@ void handle_client(int client_socket, int id)
 			end_connection(id);							
 			return;
 		}
-		broadcast_message(string(name),id);					
-		broadcast_message(id,id);		
-		broadcast_message(string(str),id);
-		shared_print(color(id)+name+" : "+def_col+str);		
+        int reciver_id = get_reciver_id(string(str));
+        if (reciver_id < 0)
+        {
+		    broadcast_message(string(name),id);					
+		    broadcast_message(id,id);		
+		    broadcast_message(string(str),id);
+        } else
+        {
+            private_message(string(name),id,reciver_id)
+            private_message(id,id,reciver_id)
+            private_message(string(str),id,reciver_id)
+        }
+		shared_print(color(id)+name+" : "+def_col+str);
 	}	
 }
