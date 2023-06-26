@@ -57,8 +57,10 @@ int main()
 	//char name[MAX_LEN];
 	//cout<<"Enter your name : ";
 	//cin.getline(name,MAX_LEN);
-    char* name = getenv("USER");
-	send(client_socket,name,sizeof(name),0);
+	//send(client_socket,name,sizeof(name),0);
+    string name_string = getenv("USER");
+    const char* name = name_string.c_str();
+    send(client_socket,name,name_string.size(),0);
 
 	cout<<colors[NUM_COLORS-1]<<"\n\t  ====== Welcome to the chat-room ======   "<<endl<<def_col;
 
