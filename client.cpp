@@ -34,11 +34,15 @@ int main()
 		exit(-1);
 	}
 
+    char server_ip[MAX_LEN];
+    cout<<"Enter Server IP : ";
+    cin.getline(server_ip,MAX_LEN);
+
 	struct sockaddr_in client;
 	client.sin_family=AF_INET;
 	client.sin_port=htons(10000); // Port no. of server
 	client.sin_addr.s_addr=INADDR_ANY;
-	//client.sin_addr.s_addr=inet_addr("127.0.0.1"); // Provide IP address of server
+	client.sin_addr.s_addr=inet_addr(server_ip); // Provide IP address of server
 	bzero(&client.sin_zero,0);
 
 	if((connect(client_socket,(struct sockaddr *)&client,sizeof(struct sockaddr_in)))==-1)
