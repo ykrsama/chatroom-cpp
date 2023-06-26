@@ -6,19 +6,12 @@ A chatroom built in C++ using the concepts of socket programming and multi-threa
 ## How to run
 
 1. Clone this repository
-2. Run the following commands in your terminal :
-```
-g++ server.cpp -lpthread -o server
-g++ client.cpp -lpthread -o client
-```
-3. To run the server application, use this command in the terminal :
-```
-./server
-```
-
-4. Now, open another terminal and use this command to run the client application :
+1. run ```source setup.sh``` , which will setup the environment and compile executables (client, server)
+1. Run the client application :
 ```
 ./client
 ```
-
-5. For opening multiple client applications, repeat step 4.
+1. To run the server application, use this command in the terminal. The port 64799 is already in use, please change the port number and re-compile:
+```
+./server
+```
