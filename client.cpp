@@ -34,9 +34,10 @@ int main()
 		exit(-1);
 	}
 
-    char server_ip[MAX_LEN];
-    cout<<"Enter Server IP : ";
-    cin.getline(server_ip,MAX_LEN);
+    char server_ip[] = "127.0.0.1";
+    //char server_ip[MAX_LEN];
+    //cout<<"Enter Server IP : ";
+    //cin.getline(server_ip,MAX_LEN);
 
 	struct sockaddr_in client;
 	client.sin_family=AF_INET;
