@@ -53,9 +53,10 @@ int main()
 		exit(-1);
 	}
 
+    int port = 64799;
 	struct sockaddr_in server;
 	server.sin_family=AF_INET;
-	server.sin_port=htons(64799);
+	server.sin_port=htons(port);
 	server.sin_addr.s_addr=INADDR_ANY;
 	bzero(&server.sin_zero,0);
 
@@ -75,6 +76,7 @@ int main()
 	int client_socket;
 	unsigned int len=sizeof(sockaddr_in);
 
+    cout<<"[INFO] Running on port " << port <<endl;
 	cout<<colors[NUM_COLORS-1]<<"\n\t  ====== Welcome to the chat-room ======   "<<endl<<def_col;
 
 	while(1)
