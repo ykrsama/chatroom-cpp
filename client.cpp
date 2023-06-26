@@ -9,6 +9,8 @@
 #include <thread>
 #include <signal.h>
 #include <mutex>
+#include <stdio.h>
+#include <stdlib.h>
 #define MAX_LEN 200
 #define NUM_COLORS 6
 
@@ -52,9 +54,10 @@ int main()
 		exit(-1);
 	}
 	signal(SIGINT, catch_ctrl_c);
-	char name[MAX_LEN];
-	cout<<"Enter your name : ";
-	cin.getline(name,MAX_LEN);
+	//char name[MAX_LEN];
+	//cout<<"Enter your name : ";
+	//cin.getline(name,MAX_LEN);
+    char* name = getenv("USER");
 	send(client_socket,name,sizeof(name),0);
 
 	cout<<colors[NUM_COLORS-1]<<"\n\t  ====== Welcome to the chat-room ======   "<<endl<<def_col;

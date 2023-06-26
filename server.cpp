@@ -38,9 +38,9 @@ void set_name(int id, char name[]);
 void shared_print(string str, bool endLine);
 int broadcast_message(string message, int sender_id);
 int broadcast_message(int num, int sender_id);
-int get_reciver_id(const string &message);
-int private_message(string message, int sender_id, int reciver_id);
-int private_message(int num, int sender_id, int reciver_id);
+vector<int> get_reciver_ids(const string &message);
+int private_message(string message, int sender_id, const vector<int>& reciver_id);
+int private_message(int num, int sender_id, const vector<int>& reciver_id);
 void end_connection(int id);
 void handle_client(int client_socket, int id);
 
@@ -156,8 +156,9 @@ int broadcast_message(int num, int sender_id)
     return kSuccess;
 }
 
-int get_reciver_id(const string &message)
+vector<int> get_reciver_ids(const string &message)
 {
+    vector<int> reciver_ids = {};
     auto left_bracket = message.find_last_of('[');
     auto right_bracket = message.find_last_of(']');
     if (left_bracket < right_bracket)
@@ -165,39 +166,41 @@ int get_reciver_id(const string &message)
         auto reciver_name = message.substr(left_bracket + 1, right_bracket - left_bracket - 1);
         for (int i = 0; i < clients.size(); i++)
             if (clients[i].name == reciver_name)
-                return clients[i].id;
+                reciver_ids.emplace_back(clients[i].id);
     }
-    return -1;
+    return reciver_ids;
 }
 
 // Private message
-int private_message(string message, int sender_id, int reciver_id)
+int private_message(string message, int sender_id, const vector<int> &reciver_ids)
 {
+    int status_code = kFailure;
 	char temp[MAX_LEN];
 	strcpy(temp,message.c_str());
 	for(int i=0; i<clients.size(); i++)
 	{
-		if(clients[i].id==reciver_id)
-		{
+        if (find(reciver_ids.begin(), reciver_ids.end(), clients[i].id) != reciver_ids.end())
+        {
 			send(clients[i].socket,temp,sizeof(temp),0);
-            return kSuccess;
-		}
+            status_code = kSuccess;
+        }
 	}
-    return kFailure;
+    return status_code;
 }
 
 // Private message a number 
-int private_message(int num, int sender_id, int reciver_id)
+int private_message(int num, int sender_id, const vector<int> &reciver_ids)
 {
+    int status_code = kFailure;
 	for(int i=0; i<clients.size(); i++)
 	{
-		if(clients[i].id==reciver_id)
+		if (find(reciver_ids.begin(), reciver_ids.end(), clients[i].id) != reciver_ids.end())
 		{
 			send(clients[i].socket,&num,sizeof(num),0);
-            return kSuccess;
+            status_code = kSuccess;
 		}
 	}
-    return kFailure;
+    return status_code;
 }
 
 void end_connection(int id)
@@ -244,17 +247,17 @@ void handle_client(int client_socket, int id)
 			end_connection(id);							
 			return;
 		}
-        int reciver_id = get_reciver_id(string(str));
-        if (reciver_id < 0)
+        vector<int> reciver_ids = get_reciver_ids(string(str));
+        if (reciver_ids.size()==0)
         {
 		    broadcast_message(string(name),id);					
 		    broadcast_message(id,id);		
 		    broadcast_message(string(str),id);
         } else
         {
-            private_message(string(name),id,reciver_id);
-            private_message(id,id,reciver_id);
-            private_message(string(str),id,reciver_id);
+            private_message(string(name),id,reciver_ids);
+            private_message(id,id,reciver_ids);
+            private_message(string(str),id,reciver_ids);
         }
 		shared_print(color(id)+name+" : "+def_col+str);
 	}	
