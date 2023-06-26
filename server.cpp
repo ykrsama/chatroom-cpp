@@ -55,7 +55,7 @@ int main()
 
 	struct sockaddr_in server;
 	server.sin_family=AF_INET;
-	server.sin_port=htons(10000);
+	server.sin_port=htons(64799);
 	server.sin_addr.s_addr=INADDR_ANY;
 	bzero(&server.sin_zero,0);
 
