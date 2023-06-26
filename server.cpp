@@ -137,7 +137,8 @@ int broadcast_message(string message, int sender_id)
 		{
 			send(clients[i].socket,temp,sizeof(temp),0);
 		}
-	}		
+	}
+    return kSuccess;
 }
 
 // Broadcast a number to all clients except the sender
@@ -149,7 +150,8 @@ int broadcast_message(int num, int sender_id)
 		{
 			send(clients[i].socket,&num,sizeof(num),0);
 		}
-	}		
+	}
+    return kSuccess;
 }
 
 int get_reciver_id(const string &message)
@@ -159,9 +161,9 @@ int get_reciver_id(const string &message)
     if (left_bracket < right_bracket)
     {
         auto reciver_name = message.substr(left_bracket + 1, right_bracket - left_bracket - 1);
-        for (auto client : clients)
-            if (client.name == reciver_name)
-                return client.id
+        for (int i = 0; i < clients.size(); i++)
+            if (clients[i].name == reciver_name)
+                return clients[i].id;
     }
     return -1;
 }
@@ -176,7 +178,7 @@ int private_message(string message, int sender_id, int reciver_id)
 		if(clients[i].id==reciver_id)
 		{
 			send(clients[i].socket,temp,sizeof(temp),0);
-            return kSuccesss;
+            return kSuccess;
 		}
 	}
     return kFailure;
@@ -248,9 +250,9 @@ void handle_client(int client_socket, int id)
 		    broadcast_message(string(str),id);
         } else
         {
-            private_message(string(name),id,reciver_id)
-            private_message(id,id,reciver_id)
-            private_message(string(str),id,reciver_id)
+            private_message(string(name),id,reciver_id);
+            private_message(id,id,reciver_id);
+            private_message(string(str),id,reciver_id);
         }
 		shared_print(color(id)+name+" : "+def_col+str);
 	}	
