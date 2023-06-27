@@ -31,6 +31,7 @@ vector<terminal> clients;
 string def_col="\033[0m";
 string colors[]={"\033[31m", "\033[32m", "\033[33m", "\033[34m", "\033[35m","\033[36m"};
 int seed=0;
+char exit_message[3] = ".q";
 mutex cout_mtx,clients_mtx;
 
 string color(int code);
@@ -236,7 +237,7 @@ void handle_client(int client_socket, int id)
 		int bytes_received=recv(client_socket,str,sizeof(str),0);
 		if(bytes_received<=0)
 			return;
-		if(strcmp(str,"#exit")==0)
+		if(strcmp(str,exit_message)==0)
 		{
 			// Display leaving message
 			string message=string(name)+string(" has left");		

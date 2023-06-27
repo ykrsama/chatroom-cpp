@@ -22,7 +22,7 @@ thread t_send, t_recv;
 int client_socket;
 string def_col="\033[0m";
 string colors[]={"\033[31m", "\033[32m", "\033[33m", "\033[34m", "\033[35m", "\033[36m"};
-mutex coutMutex;
+char exit_message[3] = ".q";
 string m_msg_to_send;
 
 void catch_ctrl_c(int signal);
@@ -133,8 +133,7 @@ int main()
 void catch_ctrl_c(int signal) 
 {
 	initTermios(true);
-    char str[MAX_LEN]="#exit";
-	send(client_socket,str,sizeof(str),0);
+	send(client_socket,exit_message,sizeof(exit_message),0);
 	exit_flag=true;
 	t_send.detach();
 	t_recv.detach();
@@ -167,7 +166,7 @@ int eraseText(int cnt)
 //		char str[MAX_LEN];
 //		cin.getline(str,MAX_LEN);
 //		send(client_socket,str,sizeof(str),0);
-//		if(strcmp(str,"#exit")==0)
+//		if(strcmp(str,exit_message)==0)
 //		{
 //			exit_flag=true;
 //			t_recv.detach();	
@@ -198,7 +197,7 @@ void send_message(int client_socket)
             }
         }
         send(client_socket, m_msg_to_send.c_str(), m_msg_to_send.size() + 1,0);
-        if(m_msg_to_send == "#exit")
+        if(m_msg_to_send == exit_message)
         {
             exit_flag = true;
             t_recv.detach();
