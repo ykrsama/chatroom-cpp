@@ -14,6 +14,11 @@
 #include <termios.h>
 #define MAX_LEN 200
 #define NUM_COLORS 6
+#define gotoxy(x,y) printf("\033[%d;%dH", (y), (x))
+#define KEY_UP    65
+#define KEY_DOWN  66
+#define KEY_LEFT  68
+#define KEY_RIGHT 67
 
 using namespace std;
 
@@ -78,6 +83,25 @@ void clear_char_array(char* str, int len )
         str[i]='\0';
     }
 };
+
+
+
+bool process_arrow_key(char key)
+{
+    switch(key) {
+    case KEY_UP:
+        return true;
+    case KEY_DOWN:
+        return true;
+    case KEY_LEFT:
+        return false;
+    case KEY_RIGHT:
+        return false;
+    default:
+        return false;
+    }
+    return false;
+}
 
 int main()
 {
@@ -158,25 +182,6 @@ int eraseText(int cnt)
     return 0;
 }
 
-//// Send message to everyone
-//void send_message(int client_socket)
-//{
-//	while(1)
-//	{
-//		cout<<colors[1]<<"You : "<<def_col;
-//		char str[MAX_LEN];
-//		cin.getline(str,MAX_LEN);
-//		send(client_socket,str,sizeof(str),0);
-//		if(strcmp(str,exit_message)==0)
-//		{
-//			exit_flag=true;
-//			t_recv.detach();	
-//			close(client_socket);
-//			return;
-//		}	
-//	}		
-//}
-
 void send_message(int client_socket)
 {
     while(1)
@@ -191,6 +196,10 @@ void send_message(int client_socket)
                 if (m_msg_to_send.size()==0) continue;
                 m_msg_to_send.pop_back();
                 cout << "\b \b";
+            }
+            if (process_arrow_key(key))
+            {
+                key = '\0';
             }
             else
             {
