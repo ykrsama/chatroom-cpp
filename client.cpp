@@ -125,14 +125,15 @@ int main()
 		t_send.join();
 	if(t_recv.joinable())
 		t_recv.join();
-			
+    initTermios(true);
 	return 0;
 }
 
 // Handler for "Ctrl + C"
 void catch_ctrl_c(int signal) 
 {
-	char str[MAX_LEN]="#exit";
+	initTermios(true);
+    char str[MAX_LEN]="#exit";
 	send(client_socket,str,sizeof(str),0);
 	exit_flag=true;
 	t_send.detach();
