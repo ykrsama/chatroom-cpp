@@ -188,6 +188,7 @@ void send_message(int client_socket)
         {
             if(key == 127 || key == 8)
             {
+                if (m_msg_to_send.size()==0) continue;
                 m_msg_to_send.pop_back();
                 cout << "\b \b";
             }
@@ -197,7 +198,8 @@ void send_message(int client_socket)
                 cout<<key;
             }
         }
-        send(client_socket, m_msg_to_send.c_str(), m_msg_to_send.size() + 1,0);
+        if (m_msg_to_send.size() > 0)
+            send(client_socket, m_msg_to_send.c_str(), m_msg_to_send.size() + 1,0);
         if(m_msg_to_send == exit_message)
         {
             exit_flag = true;
