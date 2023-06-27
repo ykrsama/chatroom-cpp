@@ -114,7 +114,7 @@ int main()
     send(client_socket,name,name_string.size(),0);
 
 	cout<<colors[NUM_COLORS-1]<<"\n\t  ====== Welcome to the chat-room ======   "<<endl<<def_col;
-    cout<<colors[NUM_COLORS-1]<<"\nAppend [name] to send a private message. i.e. You: message [wantzhen]\n"<<endl<<def_col;
+    cout<<colors[NUM_COLORS-1]<<"\nAppend [name] to send a private message. i.e. You: message [wangzhen]\n"<<endl<<def_col;
 
 	thread t1(send_message, client_socket);
 	thread t2(recv_message, client_socket);
