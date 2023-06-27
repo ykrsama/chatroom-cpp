@@ -11,6 +11,7 @@
 #include <mutex>
 #include <stdio.h>
 #include <stdlib.h>
+#include <termios.h>
 #define MAX_LEN 200
 #define NUM_COLORS 6
 
@@ -21,12 +22,62 @@ thread t_send, t_recv;
 int client_socket;
 string def_col="\033[0m";
 string colors[]={"\033[31m", "\033[32m", "\033[33m", "\033[34m", "\033[35m", "\033[36m"};
+mutex coutMutex;
+string m_msg_to_send;
 
 void catch_ctrl_c(int signal);
 string color(int code);
 int eraseText(int cnt);
 void send_message(int client_socket);
 void recv_message(int client_socket);
+
+
+static struct termios old, current;
+
+/* Initialize new terminal i/o settings */
+void initTermios(int echo) 
+{
+  tcgetattr(0, &old); /* grab old terminal i/o settings */
+  current = old; /* make new settings same as old settings */
+  current.c_lflag &= ~ICANON; /* disable buffered i/o */
+  if (echo) {
+      current.c_lflag |= ECHO; /* set echo mode */
+  } else {
+      current.c_lflag &= ~ECHO; /* set no echo mode */
+  }
+  tcsetattr(0, TCSANOW, &current); /* use these new terminal i/o settings now */
+};
+
+/* Restore old terminal i/o settings */
+void resetTermios(void) 
+{
+  tcsetattr(0, TCSANOW, &old);
+};
+
+/* Read 1 character - echo defines echo mode */
+char getch_(int echo) 
+{
+  char ch;
+  initTermios(echo);
+  ch = getchar();
+  resetTermios();
+  return ch;
+};
+
+/* Read 1 character without echo */
+char getch(void) 
+{
+  return getch_(0);
+};
+
+// clear char
+void clear_char_array(char* str, int len )
+{
+    for (int i =0; i<len; i++)
+    {
+        str[i]='\0';
+    }
+};
 
 int main()
 {
@@ -106,23 +157,55 @@ int eraseText(int cnt)
     return 0;
 }
 
-// Send message to everyone
+//// Send message to everyone
+//void send_message(int client_socket)
+//{
+//	while(1)
+//	{
+//		cout<<colors[1]<<"You : "<<def_col;
+//		char str[MAX_LEN];
+//		cin.getline(str,MAX_LEN);
+//		send(client_socket,str,sizeof(str),0);
+//		if(strcmp(str,"#exit")==0)
+//		{
+//			exit_flag=true;
+//			t_recv.detach();	
+//			close(client_socket);
+//			return;
+//		}	
+//	}		
+//}
+
 void send_message(int client_socket)
 {
-	while(1)
-	{
-		cout<<colors[1]<<"You : "<<def_col;
-		char str[MAX_LEN];
-		cin.getline(str,MAX_LEN);
-		send(client_socket,str,sizeof(str),0);
-		if(strcmp(str,"#exit")==0)
-		{
-			exit_flag=true;
-			t_recv.detach();	
-			close(client_socket);
-			return;
-		}	
-	}		
+    while(1)
+    {
+        cout<<colors[1]<<"You : "<<def_col;
+        m_msg_to_send.clear();
+        char key;
+        while((key = getch()) != '\n')
+        {
+            if(key == 127 || key == 8)
+            {
+                m_msg_to_send.pop_back();
+                cout << "\b \b";
+            }
+            else
+            {
+                m_msg_to_send += key;
+                cout<<key;
+            }
+        }
+        send(client_socket, m_msg_to_send.c_str(), m_msg_to_send.size() + 1,0);
+        if(m_msg_to_send == "#exit")
+        {
+            exit_flag = true;
+            t_recv.detach();
+            close(client_socket);
+            return;
+        }
+        cout<<endl;
+    }
 }
 
 // Receive message
@@ -139,12 +222,12 @@ void recv_message(int client_socket)
 			continue;
 		recv(client_socket,&color_code,sizeof(color_code),0);
 		recv(client_socket,str,sizeof(str),0);
-		eraseText(6);
+        eraseText(6+m_msg_to_send.size());
 		if(strcmp(name,"#NULL")!=0)
 			cout<<color(color_code)<<name<<" : "<<def_col<<str<<endl;
 		else
 			cout<<color(color_code)<<str<<endl;
-		cout<<colors[1]<<"You : "<<def_col;
+		cout<<colors[1]<<"You : "<<def_col<<m_msg_to_send;
 		fflush(stdout);
 	}	
 }
